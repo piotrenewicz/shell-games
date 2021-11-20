@@ -13,6 +13,8 @@ def initial_settings():
     system(command)
 
     stdscr = curses.initscr()
+    curses.resizeterm(TERMINAL_HEIGHT, TERMINAL_WIDTH)
+    stdscr.refresh()
 
     curses.noecho()  # Do not echo user inputs
     curses.cbreak()  # Do note wait for user to press ENTER/RETURN to confirm input
@@ -80,7 +82,7 @@ def main_menu(stdscr):
     current_row_idx = 0
     print_menu(menu_window, current_row_idx)
 
-    while 1:
+    while True:
         key = menu_window.getch()
 
         if key == curses.KEY_UP and current_row_idx > 0:
@@ -116,6 +118,9 @@ def main_menu(stdscr):
 
 
 def quit_game(stdscr):
+    curses.nocbreak()
+    stdscr.keypad(False)
+    curses.echo()
     curses.endwin()  # Restore terminal normal mode
     exit(0)
 

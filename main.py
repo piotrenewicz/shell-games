@@ -2,26 +2,28 @@ from os import system
 import curses
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
-MENU_OPTIONS = ['Guess the number', "Rock paper scissor", "Tic Tac Toe", "Chess", "Quit"]
+MENU_OPTIONS = ['Guess the number',
+                "Rock paper scissor", "Tic Tac Toe", "Chess", "Quit"]
+
 
 def initial_settings():
     """ Function setting up initial terminal settings like it's width nad height."""
-    #Setting terminal width and height to 150x50
+    # Setting terminal width and height to 150x50
     command = f"printf '\e[8;{TERMINAL_HEIGHT};{TERMINAL_WIDTH}t'"
     system(command)
 
     stdscr = curses.initscr()
 
-    curses.noecho() #Do not echo user inputs
-    curses.cbreak() #Do note wait for user to press ENTER/RETURN to confirm input
-    curses.curs_set(0) #Hide cursor
-    
+    curses.noecho()  # Do not echo user inputs
+    curses.cbreak()  # Do note wait for user to press ENTER/RETURN to confirm input
+    curses.curs_set(0)  # Hide cursor
 
-    if curses.has_colors(): #Check whether terminal supports color display
+    if curses.has_colors():  # Check whether terminal supports color display
         curses.start_color()
-    #If not maybe we should consider quitting game right here and display an error message
+    # If not maybe we should consider quitting game right here and display an error message
 
     return stdscr
+
 
 def display_banner(stdscr):
     title_width, title_height = 93, 8
@@ -35,17 +37,21 @@ def display_banner(stdscr):
 /\____) || )   ( || (____/\| (____/\| (____/\  | (___) || )   ( || )   ( || (____/\/\____) |
 \_______)|/     \|(_______/(_______/(_______/  (_______)|/     \||/     \|(_______/\_______)                                                                                               
     """
-    #Centering the title 
+    # Centering the title
     title_pos_x = TERMINAL_WIDTH//2 - title_width//2
     title_pos_y = TERMINAL_HEIGHT//2 - title_height - 10
-    #Creating sub window just for title
-    title_window = stdscr.subwin(title_height+5, title_width+5, title_pos_y, title_pos_x)
+    # Creating sub window just for title
+    title_window = stdscr.subwin(
+        title_height+5, title_width+5, title_pos_y, title_pos_x)
 
-    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK) #Setting pair of color, in this case red font on black(gray) background
-    title_window.attron(curses.color_pair(1)) #Initializing mentioned pair for colorful printing
-    title_window.addstr(1, 1, banner) #printing title banner
-    title_window.refresh() 
-    title_window.attroff(curses.color_pair(1)) #Disbale colorful printing
+    # Setting pair of color, in this case red font on black(gray) background
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+    # Initializing mentioned pair for colorful printing
+    title_window.attron(curses.color_pair(1))
+    title_window.addstr(1, 1, banner)  # printing title banner
+    title_window.refresh()
+    title_window.attroff(curses.color_pair(1))  # Disbale colorful printing
+
 
 def print_menu(menu_window, selected_row_idx):
     main_menu_width, main_menu_height = 40, 10
@@ -60,13 +66,14 @@ def print_menu(menu_window, selected_row_idx):
             menu_window.attroff(curses.color_pair(2))
         else:
             menu_window.addstr(y, x, el)
-    
+
     menu_window.refresh()
 
 
 def main_menu(stdscr):
     main_menu_width, main_menu_height = 40, 10
-    menu_window = stdscr.subwin(main_menu_height, main_menu_width, TERMINAL_HEIGHT//2, TERMINAL_WIDTH//2 - 20)
+    menu_window = stdscr.subwin(
+        main_menu_height, main_menu_width, TERMINAL_HEIGHT//2, TERMINAL_WIDTH//2 - 20)
     menu_window.box()
     menu_window.keypad(True)
 
@@ -74,7 +81,7 @@ def main_menu(stdscr):
     print_menu(menu_window, current_row_idx)
 
     while 1:
-        key = menu_window.getch()        
+        key = menu_window.getch()
 
         if key == curses.KEY_UP and current_row_idx > 0:
             current_row_idx -= 1
@@ -86,38 +93,34 @@ def main_menu(stdscr):
             stdscr.refresh()
 
             if(current_row_idx == 0):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(MENU_OPTIONS[current_row_idx]))
+                stdscr.addstr(0, 0, "Here goes {} implementation".format(
+                    MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 1):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(MENU_OPTIONS[current_row_idx]))
+                stdscr.addstr(0, 0, "Here goes {} implementation".format(
+                    MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 2):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(MENU_OPTIONS[current_row_idx]))
+                stdscr.addstr(0, 0, "Here goes {} implementation".format(
+                    MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 3):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(MENU_OPTIONS[current_row_idx]))
+                stdscr.addstr(0, 0, "Here goes {} implementation".format(
+                    MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 4):
                 quit_game(stdscr)
 
             stdscr.refresh()
             stdscr.getch()
-            
 
         print_menu(menu_window, current_row_idx)
 
         stdscr.refresh()
 
+
 def quit_game(stdscr):
-    curses.endwin() #Restore terminal normal mode
+    curses.endwin()  # Restore terminal normal mode
     exit(0)
-
-
-
-
-       
-
-    
 
 
 if __name__ == "__main__":
     stdscr = initial_settings()
     display_banner(stdscr)
     main_menu(stdscr)
-    

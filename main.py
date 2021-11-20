@@ -128,4 +128,7 @@ def quit_game(stdscr):
 if __name__ == "__main__":
     stdscr = initial_settings()
     display_banner(stdscr)
-    main_menu(stdscr)
+    try:
+        main_menu(stdscr)
+    except KeyboardInterrupt:
+        quit_game(stdscr)

@@ -1,5 +1,6 @@
 from os import system
 import curses
+import tic_tac_toe
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
@@ -101,8 +102,7 @@ def main_menu(stdscr):
                 stdscr.addstr(0, 0, "Here goes {} implementation".format(
                     MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 2):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
+                tic_tac_toe.main(stdscr)
             elif(current_row_idx == 3):
                 stdscr.addstr(0, 0, "Here goes {} implementation".format(
                     MENU_OPTIONS[current_row_idx]))

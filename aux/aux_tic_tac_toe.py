@@ -1,6 +1,13 @@
 import curses
 from typing import Iterable
 
+board_size = 5  # size of the board, A, usually 3, 5 or 7
+board = None  # A*A array of zeros, ones and twos, representing empty field, X and O respectively
+current_player = None
+
+height_step = 2 # Skip 1 character when printing horizontal lines
+width_step = 4  # Skip 3 characters when printing vertical lines
+
 
 def multiline_print_center(lines: "Iterable[str] | str", window: curses.window, highlights: "Iterable[int] | int" = None):
     # Convert to list if str was given
@@ -36,8 +43,33 @@ def multiline_print_center(lines: "Iterable[str] | str", window: curses.window, 
     return
 
 
+def draw_board(window: curses.window):
+    window.clear()
+    max_height, max_width = window.getmaxyx()
+    center_h, center_w = max_height//2, max_width//2
+
+    hline_length = board_size*width_step-1
+    vline_length = board_size*height_step-1
+
+    hline_init_y = center_h-board_size * height_step//2
+    hline_init_x = center_w - hline_length//2
+
+    vline_init_y = center_h - vline_length//2
+    vline_init_x = center_w - board_size * width_step//2
+
+    for i in range(1, board_size):
+        window.hline(hline_init_y+i*height_step, hline_init_x,
+                     curses.ACS_HLINE, hline_length)
+
+    for i in range(1, board_size):
+        window.vline(vline_init_y, vline_init_x+i*width_step,
+                     curses.ACS_VLINE, vline_length)
+
+    return
+
+
 def launch_game(window: curses.window):
-    multiline_print_center(["Gey", 'play'], window)
+    draw_board(window)
     window.getch()
     return
 

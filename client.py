@@ -8,21 +8,26 @@ host = '127.0.0.1'
 port = 1109
 pname = None
 your_turn = None
+
 class GameState:
-    chat = ["Initial message",]
+    def __init__(self, init_msg):
+        self.chat = [init_msg, ]
+
     def add_message(self, message: str):
         self.chat.append(message)
 
 
-game = GameState()
+game = GameState("msg1")
+game.add_message("msg2")
 
 
 def create_game(s: socket.socket):
     global game, pname, your_turn
     your_turn = 0
     pname = 'HOST'
-    game = GameState()
-    raw_game = pickle.dumps(game.chat, protocol=pickle.HIGHEST_PROTOCOL)
+    game = GameState("runtime_msg1")
+    game.add_message("runtime_msg2")
+    raw_game = pickle.dumps(game, protocol=pickle.HIGHEST_PROTOCOL)
     s.sendall(raw_game)
 
 
@@ -31,7 +36,7 @@ def recieve_game(s: socket.socket):
     your_turn = 1
     pname = 'GUEST'
     raw_game = s.recv(1024)
-    game.chat = pickle.loads(raw_game)
+    game = pickle.loads(raw_game)
 
 
 def game_loop(s: socket.socket):
@@ -42,11 +47,11 @@ def game_loop(s: socket.socket):
         if your_turn:
             message = input("your turn: ")
             game.add_message("".join(['[', pname, '] ', message]))
-            s.sendall(pickle.dumps(game.chat, protocol=pickle.HIGHEST_PROTOCOL))
+            s.sendall(pickle.dumps(game, protocol=pickle.HIGHEST_PROTOCOL))
             your_turn = 0
         else:
             # del game
-            game.chat = pickle.loads(s.recv(1024))
+            game = pickle.loads(s.recv(1024))
             clear()
             for msg in game.chat:
                 print(msg)

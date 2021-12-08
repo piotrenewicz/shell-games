@@ -61,7 +61,7 @@ def game_loop(s: socket.socket):
 def start_connection():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
-        player_id = s.recv(1024)
+        player_id = s.recv(1)
         if player_id == b'1':
             create_game(s)
         elif player_id == b'2':

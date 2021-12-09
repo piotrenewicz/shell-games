@@ -56,8 +56,8 @@ def begin_serwer(host, port):
         player1.send(b'0')  # inform both players to begin game
         player2.send(b'0')
         serwer_loop(player1, player2)
-        s.close()  # server loop has quit, closing shop.
-
+        # s.close()  # server loop has quit, closing shop.
+        # ^^ this is pointless, with does that
 
 if __name__ == '__main__':
     while True:

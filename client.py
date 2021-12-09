@@ -5,7 +5,7 @@ import time
 
 
 clear = lambda: os.system('clear')
-host = '127.0.0.1'
+host = '155.158.180.62'
 port = 1109
 playerID = None
 server_connection = None# socket.socket()

@@ -11,14 +11,15 @@ def serwer_loop(player1, player2):
     print("starting data transfer between players!")
     while serwer_running:
         time.sleep(.1)
-        player2, player1 = player1, player2  # exchange players to alternate attempts to push data through
+        # exchange players to alternate attempts to push data through
+        player2, player1 = player1, player2
         try:
             msg = player1.recv(1024)
         except (socket.timeout, BlockingIOError) as e:
             err = e.args[0]
             # this next if/else is a bit redundant, but illustrates how the
             # timeout exception is setup
-            if err == 11:
+            if err == 11 or err == 35 or err == 10035:
                 continue
             else:
                 print(e)
@@ -58,6 +59,7 @@ def begin_serwer(host, port):
         serwer_loop(player1, player2)
         # s.close()  # server loop has quit, closing shop.
         # ^^ this is pointless, with does that
+
 
 if __name__ == '__main__':
     while True:

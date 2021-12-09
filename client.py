@@ -17,7 +17,8 @@ game = GameState()
 
 def send_data(protocol: int, data: bytes):
     payload_size = len(data)
-    payload = protocol.to_bytes(1, "little", signed=False) + payload_size.to_bytes(4, "little", signed=False) + data
+    payload = protocol.to_bytes(1, "little", signed=False) + \
+        payload_size.to_bytes(4, "little", signed=False) + data
     server_connection.sendall(payload)
 
 
@@ -37,7 +38,7 @@ def recieve_data():
         header = server_connection.recv(1)
     except (socket.timeout, BlockingIOError) as e:
         err = e.args[0]
-        if err == 11:
+        if err == 11 or err == 35 or err == 10035:
             return False
         else:
             print(e)
@@ -53,12 +54,14 @@ def recieve_data():
             # we have something, let's see what protocol has arrived
             protocol = int.from_bytes(header, "little", signed=False)
             # ok now how big is it?
-            data_size = int.from_bytes(server_connection.recv(4), "little", signed=False)
+            data_size = int.from_bytes(
+                server_connection.recv(4), "little", signed=False)
             # let's start putting the payload together
             received_payload = b""
             reamining_payload_size = data_size
             while reamining_payload_size != 0:
-                received_payload += server_connection.recv(reamining_payload_size)
+                received_payload += server_connection.recv(
+                    reamining_payload_size)
                 reamining_payload_size = data_size - len(received_payload)
             # ok, that's all of it, now we need to hand the data into the right protocol handler
             if protocol == 1:
@@ -105,9 +108,11 @@ def game_loop():
         status = recieve_data()
         if status:
             if status == 1:
-                pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.
+                # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.
+                pass
             elif status == 2:
-                pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy wiadomość na chat.
+                # Jeśli ten kod się odpali, to właśnie dostaliśmy wiadomość na chat.
+                pass
             elif status == 3:
                 exit()
             # Jeśli wystarczy odświeżyć ekran, to można to zrobić tutaj.
@@ -155,6 +160,7 @@ def close_connection():
 
 
 if __name__ == '__main__':
-    start_connection('155.158.180.62', 1109)
+    # start_connection('155.158.180.62', 1109)
+    start_connection('127.0.0.1', 1109)
     game_loop()
     close_connection()

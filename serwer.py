@@ -14,15 +14,14 @@ def serwer_loop(player1, player2):
         player2, player1 = player1, player2  # exchange players to alternate attempts to push data through
         try:
             msg = player1.recv(1024)
-        except socket.timeout as e:
+        except (socket.timeout, BlockingIOError) as e:
             err = e.args[0]
             # this next if/else is a bit redundant, but illustrates how the
             # timeout exception is setup
-            if err == 'timed out':
+            if err == 11:
                 continue
             else:
                 print(e)
-                serwer_running = False
                 print("we have a timeout problem")
                 continue
         except socket.error as e:
@@ -32,7 +31,7 @@ def serwer_loop(player1, player2):
             continue
         else:
             if len(msg) == 0:
-                print('Got an empty transmission, this means client disconnected.')
+                print('Got an empty transmission.')
                 serwer_running = False
                 continue
             else:
@@ -54,6 +53,8 @@ def begin_serwer():
         player2.setblocking(False)
         player2.send(b'2')
         print("client2 connected.", p2addr)
+        player1.send(b'0')  # inform both players to begin game
+        player2.send(b'0')
         serwer_loop(player1, player2)
         s.close()  # server loop has quit, closing shop.
 

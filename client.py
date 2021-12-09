@@ -155,8 +155,6 @@ def close_connection():
 
 
 if __name__ == '__main__':
-    host = '155.158.180.62'
-    port = 1109
-    start_connection(host, port)
+    start_connection('155.158.180.62', 1109)
     game_loop()
     close_connection()

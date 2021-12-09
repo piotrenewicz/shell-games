@@ -1,19 +1,16 @@
 import socket
 import pickle
-import os
 import time
 
 
-clear = lambda: os.system('clear')
-host = '155.158.180.62'
-port = 1109
 playerID = None
-server_connection = None# socket.socket()
+server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 chat = []
+
 
 class GameState:
     def __init__(self):
-        pass
+        self.game_id = 0
 
 
 game = GameState()
@@ -21,7 +18,8 @@ game = GameState()
 
 def send_data(protocol: int, data: bytes):
     payload_size = len(data)
-    payload = protocol.to_bytes(1, "little", signed=False) + payload_size.to_bytes(4, "little", signed=False) + data
+    payload = protocol.to_bytes(1, "little", signed=False) + \
+        payload_size.to_bytes(4, "little", signed=False) + data
     server_connection.sendall(payload)
 
 
@@ -41,7 +39,7 @@ def recieve_data():
         header = server_connection.recv(1)
     except (socket.timeout, BlockingIOError) as e:
         err = e.args[0]
-        if err == 11:
+        if err == 11 or err == 35 or err == 10035:
             return False
         else:
             print(e)
@@ -52,17 +50,19 @@ def recieve_data():
     else:
         if len(header) == 0:
             print("connection closed")
-            exit()
+            return 3  # here causing return code for server gone.
         else:
             # we have something, let's see what protocol has arrived
             protocol = int.from_bytes(header, "little", signed=False)
             # ok now how big is it?
-            data_size = int.from_bytes(server_connection.recv(4), "little", signed=False)
+            data_size = int.from_bytes(
+                server_connection.recv(4), "little", signed=False)
             # let's start putting the payload together
             received_payload = b""
             reamining_payload_size = data_size
             while reamining_payload_size != 0:
-                received_payload += server_connection.recv(reamining_payload_size)
+                received_payload += server_connection.recv(
+                    reamining_payload_size)
                 reamining_payload_size = data_size - len(received_payload)
             # ok, that's all of it, now we need to hand the data into the right protocol handler
             if protocol == 1:
@@ -109,16 +109,20 @@ def game_loop():
         status = recieve_data()
         if status:
             if status == 1:
-                pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.
+                # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.
+                pass
             elif status == 2:
-                pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy wiadomość na chat.
+                # Jeśli ten kod się odpali, to właśnie dostaliśmy wiadomość na chat.
+                pass
+            elif status == 3:
+                exit()
             # Jeśli wystarczy odświeżyć ekran, to można to zrobić tutaj.
         else:
             time.sleep(.1)
             # Jeśli nic nie dostaliśmy od serwera, to tyle czekamy.
 
-        # game logic goes here
-        # maybe copy this function for your game, so that we can have a function for every game.
+        # This is an example of game loop function.
+        # do not write here, just import client at the top of game code.
 
         # use: continue
         # when it's not your turn, and you want to check for other player moves.
@@ -139,22 +143,26 @@ def game_loop():
         time.sleep(10)
 
 
+def start_connection(host, port):
+    global playerID
+    server_connection.connect((host, port))
+    player_id = server_connection.recv(1)
+    if player_id == b'1':
+        playerID = 1
+    elif player_id == b'2':
+        playerID = 2
+    # wait for game to begin
+    server_connection.recv(1)
+    server_connection.setblocking(False)
 
-def start_connection():
-    global server_connection, playerID
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
-        server_connection = s
-        player_id = s.recv(1)
-        if player_id == b'1':
-            playerID = 1
-        elif player_id == b'2':
-            playerID = 2
-        # wait for game to begin
-        s.recv(1)
-        s.setblocking(False)
-        game_loop()
+
+def close_connection():
+    server_connection.close()
 
 
 if __name__ == '__main__':
-    start_connection()
+    # start_connection('155.158.180.62', 1109)
+    start_connection('127.0.0.1', 1109)
+    game_loop()
+    close_connection()
+

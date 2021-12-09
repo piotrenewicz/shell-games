@@ -1,5 +1,7 @@
 from os import system
+from time import sleep
 import curses
+from konrad import *
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
@@ -9,8 +11,8 @@ MENU_OPTIONS = ['Guess the number',
 def initial_settings():
     """ Function setting up initial terminal settings like it's width nad height."""
     # Setting terminal width and height to 150x50
-    command = f"printf '\e[8;{TERMINAL_HEIGHT};{TERMINAL_WIDTH}t'"
-    system(command)
+    #command = f"printf '\e[8;{TERMINAL_HEIGHT};{TERMINAL_WIDTH}t'"
+    #system(command)
 
     stdscr = curses.initscr()
     curses.resizeterm(TERMINAL_HEIGHT, TERMINAL_WIDTH)
@@ -95,8 +97,7 @@ def main_menu(stdscr):
             stdscr.refresh()
 
             if(current_row_idx == 0):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
+                guess_the_number(stdscr)
             elif(current_row_idx == 1):
                 stdscr.addstr(0, 0, "Here goes {} implementation".format(
                     MENU_OPTIONS[current_row_idx]))

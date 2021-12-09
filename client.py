@@ -2,6 +2,7 @@ import socket
 import pickle
 import time
 
+
 playerID = None
 server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 chat = []
@@ -164,3 +165,4 @@ if __name__ == '__main__':
     start_connection('127.0.0.1', 1109)
     game_loop()
     close_connection()
+

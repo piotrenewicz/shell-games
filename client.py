@@ -119,8 +119,8 @@ def game_loop():
             time.sleep(.1)
             # Jeśli nic nie dostaliśmy od serwera, to tyle czekamy.
 
-        # game logic goes here
-        # maybe copy this function for your game, so that we can have a function for every game.
+        # This is an example of game loop function.
+        # do not write here, just import client at the top of game code.
 
         # use: continue
         # when it's not your turn, and you want to check for other player moves.

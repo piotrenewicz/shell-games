@@ -3,9 +3,10 @@ from typing import Iterable
 
 board_size = 5  # size of the board, A, usually 3, 5 or 7
 board = None  # A*A array of zeros, ones and twos, representing empty field, X and O respectively
-current_player = None
+symbols = {1: "X", 2: "O"}
+current_player = 1
 
-height_step = 2 # Skip 1 character when printing horizontal lines
+height_step = 2  # Skip 1 character when printing horizontal lines
 width_step = 4  # Skip 3 characters when printing vertical lines
 
 
@@ -43,6 +44,50 @@ def multiline_print_center(lines: "Iterable[str] | str", window: curses.window, 
     return
 
 
+def select_square(window: curses.window):
+    max_height, max_width = window.getmaxyx()
+    center_h, center_w = max_height//2, max_width//2
+
+    # Automatically set the symbol to the center
+    selected_row, selected_column = board_size//2, board_size//2
+    key = None
+
+    window.keypad(True)
+    draw_board(window)
+    symbol_y = 0
+
+    symbol_x = 0
+    while not (key == curses.KEY_ENTER or key in [10, 13]):
+        window.addstr(symbol_y, symbol_x, " ")
+        # draw_symbols(window)
+
+        # Select symbol, calculate the correct position on the board
+        symbol = symbols[current_player]
+        symbol_y = center_h + (selected_row - board_size//2)*height_step
+        symbol_x = center_w + (selected_column - board_size//2)*width_step
+
+        window.addstr(symbol_y, symbol_x, symbol,
+                      curses.A_BLINK | curses.A_REVERSE)
+
+        key = window.getch()
+        if key == curses.KEY_UP:
+            selected_row -= 1
+        elif key == curses.KEY_DOWN:
+            selected_row += 1
+        if key == curses.KEY_RIGHT:
+            selected_column += 1
+        elif key == curses.KEY_LEFT:
+            selected_column -= 1
+
+        # Protection against overflow and underflow
+        selected_row = max(min(selected_row, board_size-1), 0)
+        selected_column = max(min(selected_column, board_size-1), 0)
+
+    window.keypad(False)
+
+    return
+
+
 def draw_board(window: curses.window):
     window.clear()
     max_height, max_width = window.getmaxyx()
@@ -70,6 +115,7 @@ def draw_board(window: curses.window):
 
 def launch_game(window: curses.window):
     draw_board(window)
+    select_square(window)
     window.getch()
     return
 

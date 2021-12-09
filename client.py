@@ -52,7 +52,7 @@ def recieve_data():
     else:
         if len(header) == 0:
             print("connection closed")
-            exit()
+            return 3  # here causing return code for server gone.
         else:
             # we have something, let's see what protocol has arrived
             protocol = int.from_bytes(header, "little", signed=False)
@@ -112,6 +112,8 @@ def game_loop():
                 pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.
             elif status == 2:
                 pass  # Jeśli ten kod się odpali, to właśnie dostaliśmy wiadomość na chat.
+            elif status == 3:
+                exit()
             # Jeśli wystarczy odświeżyć ekran, to można to zrobić tutaj.
         else:
             time.sleep(.1)
@@ -153,8 +155,9 @@ def start_connection():
         # wait for game to begin
         s.recv(1)
         s.setblocking(False)
-        game_loop()
+        # game_loop()
 
 
 if __name__ == '__main__':
     start_connection()
+    game_loop()

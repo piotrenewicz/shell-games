@@ -40,7 +40,7 @@ def serwer_loop(player1, player2):
     print("server closing")
 
 
-def begin_serwer():
+def begin_serwer(host, port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
         s.listen()
@@ -60,4 +60,6 @@ def begin_serwer():
 
 
 if __name__ == '__main__':
-    begin_serwer()
+    while True:
+        begin_serwer(host, port)
+        print("continuous mode. Restarting server")

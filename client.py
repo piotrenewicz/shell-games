@@ -1,19 +1,15 @@
 import socket
 import pickle
-import os
 import time
 
-
-clear = lambda: os.system('clear')
-host = '127.0.0.1'
-port = 1109
 playerID = None
-server_connection = None# socket.socket()
+server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 chat = []
+
 
 class GameState:
     def __init__(self):
-        pass
+        self.game_id = 0
 
 
 game = GameState()
@@ -141,23 +137,26 @@ def game_loop():
         time.sleep(10)
 
 
+def start_connection(host, port):
+    global playerID
+    server_connection.connect((host, port))
+    player_id = server_connection.recv(1)
+    if player_id == b'1':
+        playerID = 1
+    elif player_id == b'2':
+        playerID = 2
+    # wait for game to begin
+    server_connection.recv(1)
+    server_connection.setblocking(False)
 
-def start_connection():
-    global server_connection, playerID
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
-        server_connection = s
-        player_id = s.recv(1)
-        if player_id == b'1':
-            playerID = 1
-        elif player_id == b'2':
-            playerID = 2
-        # wait for game to begin
-        s.recv(1)
-        s.setblocking(False)
-        # game_loop()
+
+def close_connection():
+    server_connection.close()
 
 
 if __name__ == '__main__':
-    start_connection()
+    host = '155.158.180.62'
+    port = 1109
+    start_connection(host, port)
     game_loop()
+    close_connection()

@@ -67,3 +67,4 @@ if __name__ == '__main__':
             begin_serwer(host, port)
         except:
             print("Wait")
+            sleep(10)

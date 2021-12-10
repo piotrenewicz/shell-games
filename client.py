@@ -2,7 +2,6 @@ import socket
 import pickle
 import time
 
-
 playerID = None
 server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 chat = []
@@ -11,7 +10,6 @@ chat = []
 class GameState:
     def __init__(self):
         self.game_id = -1
-
 
 game = GameState()
 
@@ -84,6 +82,7 @@ def receive_game(raw_game):
     global game
     game = pickle.loads(raw_game)
 
+    
 def game_loop():
     global game
     game_running = True
@@ -149,4 +148,3 @@ if __name__ == '__main__':
     start_connection('127.0.0.1', 1109)
     game_loop()
     close_connection()
-

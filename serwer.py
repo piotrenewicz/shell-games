@@ -63,6 +63,8 @@ def begin_serwer(host, port):
 
 if __name__ == '__main__':
     while True:
-        begin_serwer(host, port)
-        time.sleep(10)
-        print("continuous mode. Restarting server")
+        try:
+            begin_serwer(host, port)
+        except:
+            print("Wait")
+            sleep(10)

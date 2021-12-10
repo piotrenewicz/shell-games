@@ -9,8 +9,7 @@ chat = []
 
 class GameState:
     def __init__(self):
-        self.game_id = 0
-
+        self.game_id = -1
 
 game = GameState()
 
@@ -33,7 +32,7 @@ def send_chat(message: str):
     send_data(2, raw_message)
 
 
-def recieve_data():
+def receive_data():
     try:
         header = server_connection.recv(1)
     except (socket.timeout, BlockingIOError) as e:
@@ -65,9 +64,9 @@ def recieve_data():
                 reamining_payload_size = data_size - len(received_payload)
             # ok, that's all of it, now we need to hand the data into the right protocol handler
             if protocol == 1:
-                recieve_game(received_payload)
+                receive_game(received_payload)
             elif protocol == 2:
-                recieve_chat(received_payload)
+                receive_chat(received_payload)
             else:
                 print("We've got an unknown protocol!:", protocol)
                 return False
@@ -75,37 +74,22 @@ def recieve_data():
     return False
 
 
-def recieve_chat(raw_chat):
+def receive_chat(raw_chat):
     chat.append(raw_chat.decode())
 
 
-def recieve_game(raw_game):
+def receive_game(raw_game):
     global game
     game = pickle.loads(raw_game)
 
-
-# def create_game():
-#     global game, pname
-#     pname = 'HOST'
-#     game = GameState()
-#     raw_game = pickle.dumps(game, protocol=4)
-
-#
-# def recieve_game():
-#     global game, pname, your_turn
-#     your_turn = 1
-#     pname = 'GUEST'
-#     raw_game = s.recv(1024)
-#     game = pickle.loads(raw_game)
-
-
+    
 def game_loop():
     global game
     game_running = True
     print('HOST' if playerID == 1 else 'GUEST')
     counter = 0
     while game_running:
-        status = recieve_data()
+        status = receive_data()
         if status:
             if status == 1:
                 # Jeśli ten kod się odpali, to właśnie dostaliśmy stan gry, od przeciwnika.

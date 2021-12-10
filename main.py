@@ -1,16 +1,23 @@
 from os import system
+from time import sleep
 import curses
+import guess_the_number
+import client
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
-                "Rock paper scissor", "Tic Tac Toe", "Chess", "Quit"]
+                "Rock paper scissor", "Tic Tac Toe", "Chess", "Join", "Quit"]
+
+MENU_TRIGGERS = [guess_the_number]
+HOST = '127.0.0.1'
+PORT = 1109
 
 
 def initial_settings():
     """ Function setting up initial terminal settings like it's width nad height."""
     # Setting terminal width and height to 150x50
-    command = f"printf '\e[8;{TERMINAL_HEIGHT};{TERMINAL_WIDTH}t'"
-    system(command)
+    #command = f"printf '\e[8;{TERMINAL_HEIGHT};{TERMINAL_WIDTH}t'"
+    #system(command)
 
     stdscr = curses.initscr()
     curses.resizeterm(TERMINAL_HEIGHT, TERMINAL_WIDTH)
@@ -19,6 +26,7 @@ def initial_settings():
     curses.noecho()  # Do not echo user inputs
     curses.cbreak()  # Do note wait for user to press ENTER/RETURN to confirm input
     curses.curs_set(0)  # Hide cursor
+    stdscr.nodelay(1)
 
     if curses.has_colors():  # Check whether terminal supports color display
         curses.start_color()
@@ -71,6 +79,14 @@ def print_menu(menu_window, selected_row_idx):
 
     menu_window.refresh()
 
+def join_the_game(stdscr):
+    client.start_connection(HOST, PORT)
+    sleep(.5)
+    if client.receive_data() == 1:
+        MENU_TRIGGERS[client.game.game_id].join_game(stdscr)
+    else:
+        quit_game(stdscr)
+
 
 def main_menu(stdscr):
     main_menu_width, main_menu_height = 40, 10
@@ -94,19 +110,20 @@ def main_menu(stdscr):
             menu_window.clear()
             stdscr.refresh()
 
-            if(current_row_idx == 0):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
-            elif(current_row_idx == 1):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
-            elif(current_row_idx == 2):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
-            elif(current_row_idx == 3):
-                stdscr.addstr(0, 0, "Here goes {} implementation".format(
-                    MENU_OPTIONS[current_row_idx]))
+            if(current_row_idx in range(0, 4)):
+                MENU_TRIGGERS[current_row_idx].create_game(stdscr)
+            # elif(current_row_idx == 1):
+            #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
+            #         MENU_OPTIONS[current_row_idx]))
+            # elif(current_row_idx == 2):
+            #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
+            #         MENU_OPTIONS[current_row_idx]))
+            # elif(current_row_idx == 3):
+            #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
+            #         MENU_OPTIONS[current_row_idx]))
             elif(current_row_idx == 4):
+                join_the_game(stdscr)
+            elif(current_row_idx == 5):
                 quit_game(stdscr)
 
             stdscr.refresh()
@@ -122,6 +139,7 @@ def quit_game(stdscr):
     stdscr.keypad(False)
     curses.echo()
     curses.endwin()  # Restore terminal normal mode
+    client.close_connection()
     exit(0)
 
 

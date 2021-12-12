@@ -133,12 +133,24 @@ class ChessPiece:
 
 
 class Pawn(ChessPiece):
-    # def __init__(self, x: int, y: int, color: bool):
-    #     super().__init__(x, y, color)
-    #     self.has_moved = False
+    def __init__(self, x: int, y: int, color: bool):
+        super().__init__(x, y, color)
+        self.used_special = False
 
     def symbol(self):
         return "P"
+
+    def do_move(self, x, y):
+        if not self.has_moved and abs(y - self.position_y) == 2:
+            self.used_special = True
+        self.position_x = x
+        self.position_y = y
+        self.has_moved = True
+        if y == (0 if self.color else 7):
+            # promocja
+            client.game.board.append(Queen(self.position_x, self.position_y, self.color))
+            client.game.board.remove(self)
+
 
     def can_move(self, x: int, y: int):
         allowed_direction = -1 if self.color else 1
@@ -157,11 +169,28 @@ class Pawn(ChessPiece):
     def can_attack(self, x: int, y: int):
         allowed_direction = -1 if self.color else 1
         target_piece = client.game.space_taken(x, y)
-        if target_piece:
-            if target_piece.color != self.color:
-                if y == self.position_y + allowed_direction and \
-                        (x == self.position_x + 1 or x == self.position_x - 1):
+        if y == self.position_y + allowed_direction and \
+                (x == self.position_x + 1 or x == self.position_x - 1):
+            if target_piece:
+                if target_piece.color != self.color:
                     return True
+            else:  # check en_passant
+                target_piece = client.game.space_taken(x, self.position_y)
+                if target_piece:
+                    if target_piece.color != self.color and type(target_piece) == Pawn:
+                        if target_piece.used_special:
+                            backup_board = copy.deepcopy(client.game.board)
+                            client.game.board.remove(target_piece)
+                            self.do_move(x, y)
+                            if not client.game.check():
+                                client.game.board = backup_board
+                                return False
+
+                            client.send_game(client.game)
+                            global my_turn
+                            my_turn = False
+                            return False
+
         return False
 
 
@@ -249,6 +278,34 @@ class King(ChessPiece):
             return True
 
     def can_move(self, x: int, y: int):
+        if not self.has_moved:  # Castle.
+            target = client.game.space_taken(x, y)
+            if target:
+                if target.color == self.color and type(target) == Tower and not target.has_moved:
+                    if self.line_free(x, y, straight=True, diagonal=False, aggresive=True):
+                        # executing a castle move
+                        if not client.game.check():
+                            return False
+                        board_backup = copy.deepcopy(client.game.board)
+                        direction = sign(x - self.position_x)
+                        self.do_move(self.position_x + direction, self.position_y)
+                        if not client.game.check():
+                            client.game.board = board_backup
+                            return False
+                        self.do_move(self.position_x + direction, self.position_y)
+                        if not client.game.check():
+                            client.game.board = board_backup
+                            return False
+                        target.do_move(self.position_x - direction, self.position_y)
+                        if not client.game.check():
+                            client.game.board = board_backup
+                            return False
+
+                        client.send_game(client.game)
+                        global my_turn
+                        my_turn = False
+                        return False
+
         return self.in_range(x, y) and not client.game.space_taken(x, y)
 
     def can_attack(self, x: int, y: int):
@@ -339,8 +396,9 @@ def ascii_helper(value):
         return False
     return True
 
-
+my_turn = None
 def game_loop(window: curses.window, chat_window: curses.window, game_window: curses.window):
+    global my_turn
     client.game.draw_board(game_window)
     game_window.refresh()
     window.refresh()
@@ -369,6 +427,9 @@ def game_loop(window: curses.window, chat_window: curses.window, game_window: cu
         if my_turn != pturn:
             pturn = my_turn
             if my_turn:
+                for piece in client.game.board:
+                    if piece.color == (1 if client.playerID == 1 else 0) and type(piece) == Pawn:
+                        piece.used_special = False
                 window.addstr(chessboard.total_board_y - 1, chessboard.total_board_x, "YOUR TURN")
             else:
                 window.addstr(chessboard.total_board_y - 1, chessboard.total_board_x, "WAIT     ")

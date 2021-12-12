@@ -21,6 +21,7 @@ def join_game(window: curses.window):
 
 
 board_size = 5  # size of the board, A, usually 3, 5 or 7
+points_to_win = board_size
 # A*A array of zeros, ones and twos, representing empty field, X and O respectively
 # board = [[0]*board_size for _ in range(board_size)]
 # 1=X is for player 1, 2=O is for player 2, 0=" " is for free field
@@ -167,6 +168,83 @@ def draw_board(window: curses.window):
     return
 
 
+def check_window(iterable: "list[int]"):
+    all_ones = all(elem == 1 for elem in iterable)
+    all_twos = all(elem == 2 for elem in iterable)
+
+    return 1 if all_ones else 2 if all_twos else 0
+
+
+def check_rows(board: "list[list[int]]", x_to_win: int, checks_per_line: int):
+    for row in board:
+        for i in range(checks_per_line):
+            window = row[i:x_to_win+i]
+            result = check_window(window)
+            if result:
+                return result
+    return 0
+
+
+def check_columns(board: "list[list[int]]", x_to_win: int, checks_per_line: int):
+    n_columns = len(board[0])
+    for i in range(n_columns):
+        # Transpose a column to be like a row, and do exactly the same what with a row
+        column = [row[i] for row in board]
+        for i in range(checks_per_line):
+            window = column[i:x_to_win+i]
+            result = check_window(window)
+            if result:
+                return result
+    return 0
+
+
+def check_descending_diagonals(board: "list[list[int]]", x_to_win: int, checks_per_line: int):
+    for row_bias in range(checks_per_line):
+        for column_bias in range(checks_per_line):
+            # End looping over biases
+            diagonal = []
+            for i in range(x_to_win):
+                diagonal.append(board[row_bias+i][column_bias+i])
+            result = check_window(diagonal)
+            if result:
+                return result
+    return 0
+
+
+def check_ascending_diagonals(board: "list[list[int]]", x_to_win: int, checks_per_line: int):
+    last_index = len(board)-1
+    for row_bias in range(checks_per_line):
+        for column_bias in range(checks_per_line):
+            # End looping over biases
+            diagonal = []
+            for i in range(x_to_win):
+                diagonal.append(board[last_index-row_bias-i][column_bias+i])
+            result = check_window(diagonal)
+            if result:
+                return result
+    return 0
+
+
+def get_winner(board: "list[list[int]]", x_to_win: int):
+    # If x_to_win != board_size, we have to create a sliding window
+    checks_per_line = len(board)-x_to_win+1
+    winner = check_rows(board, x_to_win, checks_per_line) or \
+        check_columns(board, x_to_win, checks_per_line) or \
+        check_ascending_diagonals(board, x_to_win, checks_per_line) or \
+        check_descending_diagonals(board, x_to_win, checks_per_line)
+
+    return winner
+
+
+def win(winner: int, window: curses.window):
+    window.clear()
+    multiline_print_center(
+        ["Congratulations!", f"Player {winner}-{symbols[winner]} is the winner"], window)
+    window.getch()
+
+    return
+
+
 def launch_game(window: curses.window):
     my_turn = True if client.playerID == 1 else False
     while True:
@@ -178,9 +256,14 @@ def launch_game(window: curses.window):
                 exit()
 
         if my_turn:
-            select_square(window)
+            if not get_winner(client.game.board, points_to_win):
+                select_square(window)
             client.send_game(client.game)
             my_turn = False
+        if (winner := get_winner(client.game.board, points_to_win)):
+            break
+    win(winner, window)
+
 
 #
 # def main_menu(window: curses.window):
@@ -226,10 +309,6 @@ def launch_game(window: curses.window):
 
 
 # =====added here during merge to keep this code compatible with server=======
-
-
-
-
 
 
 # ============================================================================

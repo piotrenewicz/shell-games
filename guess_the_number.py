@@ -66,11 +66,9 @@ def display_title(window, end = False):
 
 def display_chat(window):
     """Displays chat window and it's content"""
-    window.box()
     window.refresh()
 
 def display_chat_text_field(window):
-    window.box()
     window.refresh()
 
 def display_results(window):
@@ -89,18 +87,13 @@ def display_results(window):
     
     window.refresh()
 
-def update_results(window):
-    window.addstr(5, 9 - len(str(client.game.player_scores[0]))//2, str(client.game.player_scores[0]))
-    window.addstr(5, 69 - len(str(client.game.player_scores[1]))//2, str(client.game.player_scores[1]))
-    window.refresh()
-
 def check_answer():
     return int(client.game.player_numbers[client.playerID - 1]) == client.game.number_to_guess
         
 def gameplay(stdscr, gameplay_window, chat_window, results_window, chat_text_field):
     player_turn = client.playerID == 1
+    to_send = ""
     user_input = ""
-    client.send_chat("ODP. " + str(client.game.number_to_guess))
     gameplay_window.addstr(5, 2, " "*37)
     flag = True
 
@@ -123,30 +116,40 @@ def gameplay(stdscr, gameplay_window, chat_window, results_window, chat_text_fie
             #user_input = str(gameplay_window.getstr(3, 39, 2))
             c = gameplay_window.getch()
             if c == curses.KEY_ENTER or c == 10 or c == 13:
-                gameplay_window.addstr(3, 39, "  ")
-                client.send_chat(user_input)           
-                client.game.player_numbers[client.playerID - 1] = user_input
-                player_turn = False
-                if check_answer():
-                    client.game.player_scores[client.playerID - 1] += 1
-                    display_gameplay(gameplay_window, 2)
-                    display_results(results_window)
-                    client.game.generate_new_number()
-                    client.send_chat("ODP. " + str(client.game.number_to_guess))
-                    client.game.end_a_match(stdscr, title_window)
-                client.send_game(client.game)
+                if flag == False:
+                    client.send_chat(to_send)
+                    to_send = ""
+                else:
+                    gameplay_window.addstr(3, 39, "  ")
+                    client.send_chat(user_input)           
+                    client.game.player_numbers[client.playerID - 1] = user_input
+                    player_turn = False
+                    if check_answer():
+                        client.game.player_scores[client.playerID - 1] += 1
+                        display_gameplay(gameplay_window, 2)
+                        display_results(results_window)
+                        client.game.generate_new_number()
+                        client.game.end_a_match(stdscr, title_window)
+                    client.send_game(client.game)
                 user_input = ""
-            elif c == curses.KEY_HOME:
-                flag = not flag
+            #if key different than ENTER/RETURN
             elif c != -1:
+                #if KEY '/' -> switch to chat
+                if c == 47:
+                    flag = not flag
+                    user_input = ""
+                    to_send = ""
+                #Number input
                 if flag and c in range(48, 58):
                     user_input = user_input + chr(c)
                     gameplay_window.addstr(3, 39, user_input)
-                else:
-                    if c != curses.KEY_HOME or c != 48:
-                        user_input = user_input + chr(c)
-                        chat_text_field.addstr(1, 1, user_input)
-                        chat_text_field.refresh()
+                #Chat input
+                elif flag == False:
+
+                    to_send = to_send + chr(c)
+                    chat_text_field.addstr(1, 1, " "*30)
+                    chat_text_field.addstr(1, 1, to_send)
+                    chat_text_field.refresh()
             
             #client.send_chat(str(aux_num))
 
@@ -163,7 +166,7 @@ def gameplay(stdscr, gameplay_window, chat_window, results_window, chat_text_fie
 
 def display_gameplay(window, state = 0):
     window.addstr(1, 2, " "*70)
-    if state == 0:       
+    if state == 0:     
         window.addstr(1, 40 - len("YOUR NUMBER")//2, "YOUR NUMBER")
         window.addstr(5, 2, " "*70)
     elif state == 1:

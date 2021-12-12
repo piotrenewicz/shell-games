@@ -1,14 +1,24 @@
 from os import system
 from time import sleep
 import curses
-import guess_the_number
 import client
+
+def quit_game(stdscr):
+    curses.nocbreak()
+    stdscr.keypad(False)
+    curses.echo()
+    curses.endwin()  # Restore terminal normal mode
+    client.close_connection()
+    exit(0)
+
+import guess_the_number
+import rock_paper_scissors
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
                 "Rock paper scissor", "Tic Tac Toe", "Chess", "Join", "Quit"]
 
-MENU_TRIGGERS = [guess_the_number]
+MENU_TRIGGERS = [guess_the_number, rock_paper_scissors]
 HOST = '127.0.0.1'
 PORT = 1109
 
@@ -112,9 +122,6 @@ def main_menu(stdscr):
 
             if(current_row_idx in range(0, 4)):
                 MENU_TRIGGERS[current_row_idx].create_game(stdscr)
-            # elif(current_row_idx == 1):
-            #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
-            #         MENU_OPTIONS[current_row_idx]))
             # elif(current_row_idx == 2):
             #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
             #         MENU_OPTIONS[current_row_idx]))
@@ -134,13 +141,7 @@ def main_menu(stdscr):
         stdscr.refresh()
 
 
-def quit_game(stdscr):
-    curses.nocbreak()
-    stdscr.keypad(False)
-    curses.echo()
-    curses.endwin()  # Restore terminal normal mode
-    client.close_connection()
-    exit(0)
+
 
 
 if __name__ == "__main__":

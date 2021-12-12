@@ -2,12 +2,24 @@ import curses
 from typing import Iterable
 
 board_size = 5  # size of the board, A, usually 3, 5 or 7
-board = None  # A*A array of zeros, ones and twos, representing empty field, X and O respectively
-symbols = {1: "X", 2: "O"}
-current_player = 1
+# A*A array of zeros, ones and twos, representing empty field, X and O respectively
+board = [[0]*board_size for _ in range(board_size)]
+# 1=X is for player 1, 2=O is for player 2, 0=" " is for free field
+symbols = {1: "X", 2: "O", 0: " "}
+current_player = 1  # Default first player
 
-height_step = 2  # Skip 1 character when printing horizontal lines
-width_step = 4  # Skip 3 characters when printing vertical lines
+height_step = 2  # Skip 1 character when printing horizontal lines of the board
+width_step = 4  # Skip 3 characters when printing vertical lines of the board
+
+
+def get_y_for_row(row: int, center_y: int):
+    """Get absolute Y position on the screen for the Nth row on the player's table"""
+    return center_y + (row - board_size//2)*height_step
+
+
+def get_x_for_column(column: int, center_x: int):
+    """Get absolute X position on the screen for the Nth column on the player's table"""
+    return center_x + (column - board_size//2)*width_step
 
 
 def multiline_print_center(lines: "Iterable[str] | str", window: curses.window, highlights: "Iterable[int] | int" = None):
@@ -44,37 +56,60 @@ def multiline_print_center(lines: "Iterable[str] | str", window: curses.window, 
     return
 
 
+def draw_symbols(window: curses.window):
+    max_height, max_width = window.getmaxyx()
+    center_h, center_w = max_height//2, max_width//2
+
+    for i, line in enumerate(board):
+        for j, value in enumerate(line):
+            symbol = symbols[value]
+            symbol_y = get_y_for_row(i, center_h)
+            symbol_x = get_x_for_column(j, center_w)
+            window.addstr(symbol_y, symbol_x, symbol)
+
+    return
+
+
 def select_square(window: curses.window):
     max_height, max_width = window.getmaxyx()
     center_h, center_w = max_height//2, max_width//2
 
     # Automatically set the symbol to the center
     selected_row, selected_column = board_size//2, board_size//2
-    key = None
 
     window.keypad(True)
-    draw_board(window)
-    symbol_y = 0
+    key = None
 
-    symbol_x = 0
-    while not (key == curses.KEY_ENTER or key in [10, 13]):
-        window.addstr(symbol_y, symbol_x, " ")
-        # draw_symbols(window)
+    draw_board(window)
+
+    symbol = symbols[current_player]
+    symbol_y = None  # Absolute coordinate on the board
+    symbol_x = None  # Absolute coordinate on the board
+    symbol_placed = False
+    while not symbol_placed:
+        if symbol_x is not None and symbol_y is not None:
+            window.addstr(symbol_y, symbol_x, str(
+                board[selected_row][selected_column]))
+        draw_symbols(window)
 
         # Select symbol, calculate the correct position on the board
-        symbol = symbols[current_player]
-        symbol_y = center_h + (selected_row - board_size//2)*height_step
-        symbol_x = center_w + (selected_column - board_size//2)*width_step
+        symbol_y = get_y_for_row(selected_row, center_h)
+        symbol_x = get_x_for_column(selected_column, center_w)
 
         window.addstr(symbol_y, symbol_x, symbol,
                       curses.A_BLINK | curses.A_REVERSE)
 
+        # Move around the board
         key = window.getch()
-        if key == curses.KEY_UP:
+        if (key == curses.KEY_ENTER or key in [10, 13]):
+            if board[selected_row][selected_column] == 0:
+                board[selected_row][selected_column] = current_player
+                symbol_placed = True
+        elif key == curses.KEY_UP:
             selected_row -= 1
         elif key == curses.KEY_DOWN:
             selected_row += 1
-        if key == curses.KEY_RIGHT:
+        elif key == curses.KEY_RIGHT:
             selected_column += 1
         elif key == curses.KEY_LEFT:
             selected_column -= 1
@@ -114,8 +149,10 @@ def draw_board(window: curses.window):
 
 
 def launch_game(window: curses.window):
-    draw_board(window)
-    select_square(window)
+    global current_player
+    while True:
+        select_square(window)
+        current_player = 1 if current_player == 2 else 2
     window.getch()
     return
 

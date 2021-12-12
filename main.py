@@ -1,14 +1,16 @@
 from os import system
 from time import sleep
 import curses
+import tic_tac_toe
 import guess_the_number
+import chess
 import client
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
                 "Rock paper scissor", "Tic Tac Toe", "Chess", "Join", "Quit"]
 
-MENU_TRIGGERS = [guess_the_number]
+MENU_TRIGGERS = [guess_the_number, "Unimplemented", tic_tac_toe, chess]
 HOST = '127.0.0.1'
 PORT = 1109
 
@@ -110,6 +112,10 @@ def main_menu(stdscr):
             menu_window.clear()
             stdscr.refresh()
 
+            
+            # elif(current_row_idx == 2):
+            #     tic_tac_toe.main(stdscr)
+            
             if(current_row_idx in range(0, 4)):
                 MENU_TRIGGERS[current_row_idx].create_game(stdscr)
             # elif(current_row_idx == 1):
@@ -132,6 +138,7 @@ def main_menu(stdscr):
         print_menu(menu_window, current_row_idx)
 
         stdscr.refresh()
+        sleep(0.05)
 
 
 def quit_game(stdscr):

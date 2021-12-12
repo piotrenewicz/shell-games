@@ -16,11 +16,10 @@ class GuessState(client.GameState):
         self.player_numbers = ["", ""]
         self.player_won = 0
 
-client.game = GuessState()
-
 
 def create_game(stdscr):
     client.start_connection(HOST, PORT)
+    client.game = GuessState()
     client.send_game(client.game)
     guess_the_number(stdscr)
 

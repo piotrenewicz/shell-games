@@ -11,17 +11,15 @@ def quit_game(stdscr):
     client.close_connection()
     exit(0)
 
-import rock_paper_scissors
 import tic_tac_toe
 import guess_the_number
 import chess
 
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
-MENU_OPTIONS = ['Guess the number',
-                "Rock paper scissor", "Tic Tac Toe", "Chess", "Join", "Quit"]
+MENU_OPTIONS = ['Guess the number', "Tic Tac Toe", "Chess", "Join", "Quit"]
 
-MENU_TRIGGERS = [guess_the_number, rock_paper_scissors, tic_tac_toe, chess]
+MENU_TRIGGERS = [guess_the_number, tic_tac_toe, chess]
 HOST = '127.0.0.1'
 PORT = 1109
 
@@ -127,7 +125,7 @@ def main_menu(stdscr):
             # elif(current_row_idx == 2):
             #     tic_tac_toe.main(stdscr)
             
-            if(current_row_idx in range(0, 4)):
+            if(current_row_idx in range(0, 3)):
                 MENU_TRIGGERS[current_row_idx].create_game(stdscr)
             # elif(current_row_idx == 2):
             #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
@@ -135,9 +133,9 @@ def main_menu(stdscr):
             # elif(current_row_idx == 3):
             #     stdscr.addstr(0, 0, "Here goes {} implementation".format(
             #         MENU_OPTIONS[current_row_idx]))
-            elif(current_row_idx == 4):
+            elif(current_row_idx == 3):
                 join_the_game(stdscr)
-            elif(current_row_idx == 5):
+            elif(current_row_idx == 4):
                 quit_game(stdscr)
 
             stdscr.refresh()

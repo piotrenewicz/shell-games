@@ -5,7 +5,7 @@ from random import randint
 from main import quit_game
 
 TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
-HOST = '155.158.180.62'
+HOST = '127.0.0.1'
 PORT = 1109
 
 class GuessState(client.GameState):

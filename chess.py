@@ -315,7 +315,7 @@ def sign(val: int):
 
 
 def create_game(window: curses.window):
-    client.start_connection('155.158.180.62', 1109)
+    client.start_connection('127.0.0.1', 1109)
     client.game = ChessState()
     client.game.populate_board()
     client.send_game(client.game)

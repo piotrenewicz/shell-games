@@ -11,7 +11,7 @@ def quit_game(stdscr):
     client.close_connection()
     exit(0)
 
-# import rock_paper_scissors
+import rock_paper_scissors
 import tic_tac_toe
 import guess_the_number
 import chess
@@ -21,8 +21,8 @@ TERMINAL_WIDTH, TERMINAL_HEIGHT = 150, 50
 MENU_OPTIONS = ['Guess the number',
                 "Rock paper scissor", "Tic Tac Toe", "Chess", "Join", "Quit"]
 
-MENU_TRIGGERS = [guess_the_number, "rock_paper_scissors", tic_tac_toe, chess]
-HOST = '155.158.180.62'
+MENU_TRIGGERS = [guess_the_number, rock_paper_scissors, tic_tac_toe, chess]
+HOST = '127.0.0.1'
 PORT = 1109
 
 

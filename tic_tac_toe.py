@@ -10,7 +10,7 @@ class TicTacToeState(client.GameState):
 
 
 def create_game(window: curses.window):
-    client.start_connection('155.158.180.62', 1109)
+    client.start_connection('127.0.0.1', 1109)
     client.game = TicTacToeState()
     client.send_game(client.game)
     launch_game(window)

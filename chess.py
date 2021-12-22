@@ -217,14 +217,7 @@ class Horse(ChessPiece):
         delta = abs(x - self.position_x), abs(y - self.position_y)
         return delta in [
             (2, 1),
-            (1, 2),
-            (-1, 2),
-            (-2, 1),
-            (-2, -1),
-            (-1, -2),
-            (1, -2),
-            (2, -1)
-        ]
+            (1, 2)]
 
     def can_move(self, x: int, y: int):
         return self.in_range(x, y) and not client.game.space_taken(x, y)

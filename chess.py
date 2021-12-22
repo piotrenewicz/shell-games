@@ -32,9 +32,6 @@ class ChessState(client.GameState):
             pawn_y = 6
             fig_y = 7
 
-        self.kings.append(self.board[15])  # black king
-        self.kings.append(self.board[31])  # white king
-
     def draw_board(self, game_window: curses.window):
         chessboard.draw_board(game_window)
         for chesspiece in self.board:
@@ -49,7 +46,10 @@ class ChessState(client.GameState):
 
     def check(self):
         attacking_color = False if client.playerID == 1 else True
-        king_defend = self.kings[not attacking_color]
+        king_defend = ChessPiece
+        for piece in self.board:
+            if type(piece) == King and piece.color != attacking_color:
+                king_defend = piece
         x, y = king_defend.position_x, king_defend.position_y
         for piece in self.board:
             if piece.color == attacking_color:

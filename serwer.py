@@ -1,7 +1,7 @@
 import socket
 import time
 
-host = "127.0.0.1"
+host = "155.158.180.62"
 port = 1109
 game_state = None
 
